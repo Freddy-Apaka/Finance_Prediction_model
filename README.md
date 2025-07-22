@@ -48,5 +48,3 @@ A 5-slide PowerPoint presentation was created to summarize the process and resul
 
 ## 🤝 Acknowledgment
 Special thanks to **Xaltius Academy** for the opportunity and mentorship provided during this internship. This project has been an invaluable experience in applying machine learning to real-world financial data problems.
-
-## 📂 Repository Structure
