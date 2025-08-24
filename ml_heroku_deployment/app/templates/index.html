@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Approval Predictor</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #64748b;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --border-radius: 8px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin: 20px auto;
+    }
+    
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 15px;
+    }
+    
+    .loan-type-selector {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .loan-type-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid transparent;
+      padding: 8px 15px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+    
+    .loan-type-btn.active {
+      background: white;
+      color: var(--primary);
+      border-color: white;
+    }
+    
+    .form-container {
+      padding: 30px;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+    
+    .input-with-icon {
+      position: relative;
+    }
+    
+    .input-with-icon i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--secondary);
+    }
+    
+    .input-with-icon input {
+      padding-left: 40px;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: var(--transition);
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .help-text {
+      font-size: 14px;
+      color: var(--secondary);
+      margin-top: 5px;
+    }
+    
+    .error-text {
+      font-size: 14px;
+      color: var(--danger);
+      margin-top: 5px;
+      display: none;
+    }
+    
+    .form-group.invalid .error-text {
+      display: block;
+    }
+    
+    .form-group.invalid input {
+      border-color: var(--danger);
+    }
+    
+    .range-container {
+      margin-top: 10px;
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: var(--border-radius);
+    }
+    
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--secondary);
+      margin-top: 5px;
+    }
+    
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    #result {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: var(--border-radius);
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      display: none;
+    }
+    
+    .result-approved {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    
+    .result-denied {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    
+    .result-processing {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      color: var(--secondary);
+      font-size: 14px;
+    }
+    
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .loan-type-selector {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .loan-type-btn {
+        width: 80%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-hand-holding-usd"></i> Loan Approval Predictor</h1>
+      <p>Find out your chances of getting approved for a home, car, or personal loan</p>
+      
+      <div class="loan-type-selector">
+        <div class="loan-type-btn active" data-loan-type="home">
+          <i class="fas fa-home"></i> Home Loan
+        </div>
+        <div class="loan-type-btn" data-loan-type="car">
+          <i class="fas fa-car"></i> Car Loan
+        </div>
+        <div class="loan-type-btn" data-loan-type="personal">
+          <i class="fas fa-wallet"></i> Personal Loan
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-container">
+      <form id="loanForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="loan_amount">Loan Amount ($)</label>
+            <div class="input-with-icon">
+              <i class="fas fa-dollar-sign"></i>
+              <input type="number" id="loan_amount" step="any" min="1000" max="100000" name="loan_amount" placeholder="e.g., 25000" required>
+            </div>
+            <div class="help-text">Enter total loan amount between $1,000 and $100,000</div>
+            <div class="error-text">Please enter a valid loan amount between 1,000 and 100,000.</div>
+            
+            <div class="range-container">
+              <input type="range" min="1000" max="100000" step="1000" value="25000" id="loan_amount_slider">
+              <div class="range-labels">
+                <span>$1K</span>
+                <span>$50K</span>
+                <span>$100K</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="interest_rate">Interest Rate (%)</label>
+            <div class="input-with-icon">
+              <i class="fas fa-percent"></i>
+              <input type="number" id="interest_rate" step="0.1" min="1" max="15" name="interest_rate" placeholder="e.g., 5.5" required>
+            </div>
+            <div class="help-text">Enter the annual interest rate (1% to 15%)</div>
+            <div class="error-text">Enter a rate between 1 and 15.</div>
+            
+            <div class="range-container">
+              <input type="range" min="1" max="15" step="0.1" value="7.5" id="interest_rate_slider">
+              <div class="range-labels">
+                <span>1%</span>
+                <span>8%</span>
+                <span>15%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="credit_score">Credit Score</label>
+            <div class="input-with-icon">
+              <i class="fas fa-credit-card"></i>
+              <input type="number" id="credit_score" step="any" min="200" max="900" name="credit_score" placeholder="e.g., 750" required>
+            </div>
+            <div class="help-text">Enter your Credit Score (200 to 900)</div>
+            <div class="error-text">Enter a Credit Score between 200 and 900.</div>
+            
+            <div class="range-container">
+              <input type="range" min="200" max="900" step="1" value="650" id="credit_score_slider">
+              <div class="range-labels">
+                <span>200</span>
+                <span>550</span>
+                <span>900</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="employment_type">Employment Type</label>
+            <select id="employment_type" name="employment_type_encoded" required>
+              <option value="" disabled selected>Select your employment type</option>
+              <option value="0">Full-time</option>
+              <option value="1">Part-time</option>
+              <option value="2">Self-employed</option>
+            </select>
+            <div class="help-text">Select your current employment status</div>
+            <div class="error-text">Please select your employment type.</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="income_level">Income Level</label>
+            <select id="income_level" name="income_level_encoded" required>
+              <option value="" disabled selected>Select your income level</option>
+              <option value="0">High Income</option>
+              <option value="1">Low Income</option>
+              <option value="2">Medium Income</option>
+            </select>
+            <div class="help-text">Select your annual income category</div>
+            <div class="error-text">Please select your income level.</div>
+          </div>
+        </div>
+        
+        <button type="submit" id="submit-btn">
+          <i class="fas fa-calculator"></i> Check Approval Odds
+        </button>
+      </form>
+      
+      <div id="result"></div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p>© 2023 Loan Approval Predictor | Your data is secure and encrypted</p>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const form = document.getElementById("loanForm");
+      const resultDiv = document.getElementById("result");
+      const submitBtn = document.getElementById("submit-btn");
+      const loanTypeButtons = document.querySelectorAll('.loan-type-btn');
+      let selectedLoanType = 'home';
+      
+      // Loan type selection
+      loanTypeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          loanTypeButtons.forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+          selectedLoanType = this.getAttribute('data-loan-type');
+        });
+      });
+      
+      // Sync sliders with number inputs
+      const loanAmountInput = document.getElementById("loan_amount");
+      const loanAmountSlider = document.getElementById("loan_amount_slider");
+      const interestRateInput = document.getElementById("interest_rate");
+      const interestRateSlider = document.getElementById("interest_rate_slider");
+      const creditScoreInput = document.getElementById("credit_score");
+      const creditScoreSlider = document.getElementById("credit_score_slider");
+      
+      loanAmountInput.addEventListener("input", () => {
+        loanAmountSlider.value = loanAmountInput.value;
+      });
+      
+      loanAmountSlider.addEventListener("input", () => {
+        loanAmountInput.value = loanAmountSlider.value;
+      });
+      
+      interestRateInput.addEventListener("input", () => {
+        interestRateSlider.value = interestRateInput.value;
+      });
+      
+      interestRateSlider.addEventListener("input", () => {
+        interestRateInput.value = interestRateSlider.value;
+      });
+      
+      creditScoreInput.addEventListener("input", () => {
+        creditScoreSlider.value = creditScoreInput.value;
+      });
+      
+      creditScoreSlider.addEventListener("input", () => {
+        creditScoreInput.value = creditScoreSlider.value;
+      });
+      
+      // Set initial values
+      loanAmountInput.value = loanAmountSlider.value;
+      interestRateInput.value = interestRateSlider.value;
+      creditScoreInput.value = creditScoreSlider.value;
+      
+      // Form validation
+      form.addEventListener("submit", async function(event) {
+        event.preventDefault();
+        
+        // Reset previous results
+        resultDiv.style.display = "none";
+        
+        // Validate form
+        let isValid = true;
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Check if all fields are filled
+        for (let key in data) {
+          if (!data[key]) {
+            isValid = false;
+            const input = form.elements[key];
+            input.parentElement.parentElement.classList.add("invalid");
+          }
+        }
+        
+        // Specific validations
+        const loanAmount = parseFloat(data.loan_amount);
+        if (loanAmount < 1000 || loanAmount > 100000) {
+          isValid = false;
+          document.getElementById("loan_amount").parentElement.parentElement.classList.add("invalid");
+        }
+        
+        const interestRate = parseFloat(data.interest_rate);
+        if (interestRate < 1 || interestRate > 15) {
+          isValid = false;
+          document.getElementById("interest_rate").parentElement.parentElement.classList.add("invalid");
+        }
+        
+        const creditScore = parseFloat(data.credit_score);
+        if (creditScore < 200 || creditScore > 900) {
+          isValid = false;
+          document.getElementById("credit_score").parentElement.parentElement.classList.add("invalid");
+        }
+        
+        if (!isValid) {
+          return;
+        }
+        
+        // Remove invalid classes
+        const invalidElements = form.querySelectorAll(".invalid");
+        invalidElements.forEach(el => el.classList.remove("invalid"));
+        
+        // Show processing state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+        
+        // Convert numeric inputs and convert interest rate to decimal
+        for (let key in data) {
+          if (key === "interest_rate") {
+            // Convert percentage to decimal for the backend
+            data[key] = parseFloat(data[key]) / 100;
+          } else if (key !== "employment_type_encoded" && key !== "income_level_encoded") {
+            data[key] = data[key].includes(".") ? parseFloat(data[key]) : parseInt(data[key]);
+          } else {
+            data[key] = parseInt(data[key]);
+          }
+        }
+        
+        // Add loan type to data (for informational purposes only)
+        data.loan_type = selectedLoanType;
+        
+        try {
+          // Show processing state
+          resultDiv.textContent = "Processing your " + selectedLoanType + " loan application...";
+          resultDiv.className = "result-processing";
+          resultDiv.style.display = "block";
+          
+          // Send request to your API
+          const response = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
+          
+          const result = await response.json();
+          
+          // Display result
+          resultDiv.textContent = `Prediction: ${result.prediction}`;
+          resultDiv.className = result.prediction === "Approved" ? "result-approved" : "result-denied";
+          
+          // Scroll to result
+          resultDiv.scrollIntoView({ behavior: "smooth" });
+          
+        } catch (err) {
+          resultDiv.textContent = "Error: " + err.message;
+          resultDiv.className = "result-denied";
+          resultDiv.style.display = "block";
+        } finally {
+          submitBtn.innerHTML = '<i class="fas fa-calculator"></i> Check Approval Odds';
+          submitBtn.disabled = false;
+        }
+      });
+      
+      // Remove invalid class on input
+      const inputs = form.querySelectorAll("input, select");
+      inputs.forEach(input => {
+        input.addEventListener("input", () => {
+          input.parentElement.parentElement.classList.remove("invalid");
+        });
+      });
+    });
+  </script>
+</body>
+</html>
