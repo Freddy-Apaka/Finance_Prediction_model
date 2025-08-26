@@ -48,3 +48,9 @@ A 5-slide PowerPoint presentation was created to summarize the process and resul
 
 ## 🤝 Acknowledgment
 Special thanks to **Xaltius Academy** for the opportunity and mentorship provided during this internship. This project has been an invaluable experience in applying machine learning to real-world financial data problems.
+
+## 🔗 Deployment App
+
+The trained model from this repository has been deployed into an interactive web application, where users can input loan application details and get predictions in real-time.
+
+👉 [Check out the deployment repository here](https://github.com/Freddy-Apaka/ml_finance_render_deployment)
